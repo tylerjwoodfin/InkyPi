@@ -12,6 +12,8 @@ import os
 from font_fredoka_one import FredokaOne
 import datetime
 from inky.auto import auto
+import subprocess
+import sys
 
 #Variables
 CURR_DIR = os.path.dirname(os.path.realpath(__file__)) + "/"
@@ -23,6 +25,12 @@ DP = "{:.2f}" #change the value for the required decimal places
 
 inky_display = inky_display = auto(ask_user=True, verbose=True)
 inky_display.set_border(inky_display.WHITE)
+
+# Return first task
+def getTopTask():
+    output = subprocess.check_output("ssh -t pi@192.168.1.123 -p 55701 'python3 /home/pi/Git/Tasks/tasks.py ls'", shell=True).decode(sys.stdout.encoding).strip()
+    output = output.splitlines()[0][1:].strip()
+    return output
 
 # Parsing flip arguments
 parser = argparse.ArgumentParser()
@@ -181,14 +189,18 @@ draw = ImageDraw.Draw(img)
 
 # load the fonts, and text size
 font = ImageFont.truetype(FredokaOne, 24)
+fontTopTask = ImageFont.truetype(FredokaOne, 35)
 font3 = ImageFont.truetype(COURIER_FONT, 50)
 
 # Text to display and location
 if len(getError())==0:
+    print(getTopTask())
     img.paste(btcimg, (0, 45)) 
     img.paste(iconimg, (175, 7))
     draw.text((70, 45), str(COINPRICE), inky_display.RED, font=font3)
     draw.text((0, 100), f"{TIME.strftime('%B %d, %Y %l:%M %p')}, {PERCENTUPDOWN + str(PERCENTAGE)}% (24h)", inky_display.BLACK, font=font)
+    draw.text((0, 150), "Top Task:", inky_display.YELLOW, font=fontTopTask)
+    draw.text((0, 190), getTopTask(), inky_display.BLACK, font=font)
 else:
     draw.text((20, 45), "INVALID PAIR", inky_display.RED, font=font3)
 
