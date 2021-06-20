@@ -122,7 +122,7 @@ def updatePriceFile():
 def previousPriceFile():
     if file_exists:
         ObjRead = open(CURR_DIR + "/" + "previousprice", "r")
-        return ObjRead.read();
+        return ObjRead.read() or "-1";
         ObjRead.close()
     else:
         print("Price file not found")
@@ -130,7 +130,7 @@ def previousPriceFile():
         f.write(getCoinPrice())
         return float(getCoinPrice())
         
-if len(getError())==0: 
+if len(getError())==0:
     PREVIOUS_PRICE = str(previousPriceFile())
     PREVIOUS_PRICE_COMMAS = "{:,}".format(float(PREVIOUS_PRICE))
     updatePriceFile()
