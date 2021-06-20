@@ -200,7 +200,7 @@ if len(getError())==0:
     draw.text((70, 45), str(COINPRICE), inky_display.RED, font=font3)
     draw.text((0, 100), f"{TIME.strftime('%B %d, %Y %l:%M %p')}, {PERCENTUPDOWN + str(PERCENTAGE)}% (24h)", inky_display.BLACK, font=font)
     draw.text((0, 150), "Top Task:", inky_display.YELLOW, font=fontTopTask)
-    draw.text((0, 190), getTopTask(), inky_display.BLACK, font=font)
+    draw.text((0, 205), getTopTask(), inky_display.BLACK, font=font)
 else:
     draw.text((20, 45), "INVALID PAIR", inky_display.RED, font=font3)
 
