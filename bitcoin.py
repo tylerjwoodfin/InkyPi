@@ -130,7 +130,7 @@ def updatePriceFile():
 def previousPriceFile():
     if file_exists:
         ObjRead = open(CURR_DIR + "/" + "previousprice", "r")
-        return ObjRead.read() or "-1";
+        return ObjRead.read() or "-1"
         ObjRead.close()
     else:
         print("Price file not found")
@@ -147,7 +147,7 @@ if len(getError())==0:
 if len(getError())==0:
     COINPRICELOW = float(getCoinPriceLow())
     COINPRICE = float(getCoinPrice())
-    NUMBER_WITH_COMMAS = "{:,}".format(COINPRICE)
+    NUMBER_WITH_COMMAS = "{:,.2f}".format(COINPRICE)
 
 #Flip screen is false argument not passed
 if args.flip != "false":
@@ -169,6 +169,7 @@ if len(getError())==0:
     else:
         print("Going DOWN")
         COINPRICE = CURRENCYSYMBOL + NUMBER_WITH_COMMAS
+        print(COINPRICE)
         ICON = RESOURCES + "icon-down.png"
         iconimg = Image.open(ICON)
 
@@ -195,14 +196,13 @@ font3 = ImageFont.truetype(COURIER_FONT, 50)
 # Text to display and location
 if len(getError())==0:
     print(getTopTask())
-    img.paste(btcimg, (0, 45)) 
-    img.paste(iconimg, (175, 7))
-    draw.text((70, 45), str(COINPRICE), inky_display.RED, font=font3)
-    draw.text((0, 100), f"{TIME.strftime('%B %d, %Y %l:%M %p')}, {PERCENTUPDOWN + str(PERCENTAGE)}% (24h)", inky_display.BLACK, font=font)
-    draw.text((0, 150), "Top Task:", inky_display.YELLOW, font=fontTopTask)
-    draw.text((0, 205), getTopTask(), inky_display.BLACK, font=font)
+    img.paste(btcimg, (0, 25))
+    draw.text((70, 25), str(COINPRICE), inky_display.RED, font=font3)
+    draw.text((0, 80), f"{TIME.strftime('%B %d, %Y %l:%M %p')}, {PERCENTUPDOWN + str(PERCENTAGE)}% (24h)", inky_display.BLACK, font=font)
+    draw.text((0, 130), "Top Task:", inky_display.YELLOW, font=fontTopTask)
+    draw.text((0, 185), getTopTask(), inky_display.BLACK, font=font)
 else:
-    draw.text((20, 45), "INVALID PAIR", inky_display.RED, font=font3)
+    draw.text((20, 25), "INVALID PAIR", inky_display.RED, font=font3)
 
 # Display the text
 inky_display.set_image(img)
