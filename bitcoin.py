@@ -195,12 +195,13 @@ font3 = ImageFont.truetype(COURIER_FONT, 50)
 
 # Text to display and location
 if len(getError())==0:
-    print(getTopTask())
+    # print(getTopTask())
     img.paste(btcimg, (0, 25))
     draw.text((70, 25), str(COINPRICE), inky_display.RED, font=font3)
     draw.text((0, 80), f"{TIME.strftime('%B %d, %Y %l:%M %p')}, {PERCENTUPDOWN + str(PERCENTAGE)}% (24h)", inky_display.BLACK, font=font)
     draw.text((0, 130), "Top Task:", inky_display.YELLOW, font=fontTopTask)
-    draw.text((0, 185), getTopTask(), inky_display.BLACK, font=font)
+    # draw.text((0, 185), getTopTask(), inky_display.BLACK, font=font)
+    draw.text((0, 185), "Unavailable", inky_display.BLACK, font=font) 
 else:
     draw.text((20, 25), "INVALID PAIR", inky_display.RED, font=font3)
 
