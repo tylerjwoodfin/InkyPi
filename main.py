@@ -65,17 +65,17 @@ draw = ImageDraw.Draw(img)
 # load fonts
 font_baseline = ImageFont.truetype(SourceSansProSemibold, 24)
 font_header = ImageFont.truetype(SourceSansProSemibold, 35)
-font_price = ImageFont.truetype(source_directory_resources + "fonts/Courierprime.ttf", 40)
+font_price = ImageFont.truetype(SourceSansProSemibold, 55)
 font_price_label = ImageFont.truetype(SourceSansProSemibold, 20)
 font_temperature = ImageFont.truetype(SourceSansProSemibold, 95)
 font_divider = ImageFont.truetype(SourceSansProSemibold, 70)
 
 # add elements to backdrop
 try:
-    draw.text((20, 25), f"BTC ${str('{:,.2f}'.format(float(getCoinPrice())))}", inky_display.RED, font=font_price)
-    draw.text((28, 70), f"Updated at {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", inky_display.BLACK, font=font_baseline) 
+    draw.text((20, 0), f"BTC ${str('{:,.2f}'.format(float(getCoinPrice())))}", inky_display.BLACK, font=font_price)
+    draw.text((20, 65), f"Updated at {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", inky_display.BLACK, font=font_baseline) 
     
-    draw.text((28, 160), f"{weather_data['current_temperature']}°", inky_display.BLACK, font=font_temperature)
+    draw.text((20, 160), f"{weather_data['current_temperature']}°", inky_display.BLACK, font=font_temperature)
     img.paste(img_weather, (170,190))
     
 
