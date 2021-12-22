@@ -14,7 +14,7 @@ import pwd
 userDir = pwd.getpwuid( os.getuid() )[ 0 ]
 
 sys.path.insert(0, f'/home/{userDir}/Git/SecureData')
-import secureData
+import secureDataNew as SecureData
 
 # variables
 source_directory = os.path.dirname(os.path.realpath(__file__)) + "/"
@@ -22,6 +22,12 @@ source_directory_resources = source_directory + "resources/"
 
 inky_display = inky_display = auto(ask_user=True, verbose=True)
 inky_display.set_border(inky_display.WHITE)
+
+# see documentation for how to change `cloud`
+cloud = "Dropbox:SecureData/settings.json"
+
+# pull from cloud
+os.system(f"rclone copyto {cloud} settings.json")
 
 # parse flip arguments
 parser = argparse.ArgumentParser()
@@ -48,8 +54,8 @@ if args.flip != "false":
     inky_display.v_flip = True
 
 # load SecureData
-planty_status = secureData.variable('PLANTY_STATUS')
-weather_data = json.loads(secureData.variable("WEATHER_DATA"))
+planty_status = secureData.getItem("planty", "status")
+weather_data = secureData.getItem("weather", "data")
 
 # load images
 img_btc = Image.open(source_directory_resources + "btc.png")
