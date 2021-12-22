@@ -13,8 +13,10 @@ import pwd
 
 userDir = pwd.getpwuid( os.getuid() )[ 0 ]
 
-sys.path.insert(0, f'/home/{userDir}/Git/SecureData')
-import secureDataNew as SecureData
+# change to match SecureData repo
+secure_data_directory = f'/home/{userDir}/Git/SecureData'
+sys.path.insert(0, secure_data_directory)
+import secureDataNew as secureData
 
 # variables
 source_directory = os.path.dirname(os.path.realpath(__file__)) + "/"
@@ -27,7 +29,7 @@ inky_display.set_border(inky_display.WHITE)
 cloud = "Dropbox:SecureData/settings.json"
 
 # pull from cloud
-os.system(f"rclone copyto {cloud} settings.json")
+os.system(f"rclone copyto {cloud} {secure_data_directory}/settings.json")
 
 # parse flip arguments
 parser = argparse.ArgumentParser()
