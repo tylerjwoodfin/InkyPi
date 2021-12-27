@@ -8,13 +8,12 @@ import os
 from font_source_sans_pro import SourceSansProSemibold
 import datetime
 from inky.auto import auto
-import sys
-import pwd
 from securedata import securedata
 
 # variables
 source_directory = os.path.dirname(os.path.realpath(__file__)) + "/"
 source_directory_resources = source_directory + "resources/"
+secure_data_directory = securedata.getConfigItem("securePath")
 
 inky_display = inky_display = auto(ask_user=True, verbose=True)
 inky_display.set_border(inky_display.WHITE)
