@@ -10,13 +10,7 @@ import datetime
 from inky.auto import auto
 import sys
 import pwd
-
-userDir = pwd.getpwuid( os.getuid() )[ 0 ]
-
-# change to match SecureData repo
-secure_data_directory = f'/home/{userDir}/Git/SecureData'
-sys.path.insert(0, secure_data_directory)
-import secureDataNew as secureData
+from securedata import securedata
 
 # variables
 source_directory = os.path.dirname(os.path.realpath(__file__)) + "/"
@@ -56,8 +50,8 @@ if args.flip != "false":
     inky_display.v_flip = True
 
 # load SecureData
-planty_status = secureData.getItem("planty", "status")
-weather_data = secureData.getItem("weather", "data")
+planty_status = securedata.getItem("planty", "status")
+weather_data = securedata.getItem("weather", "data")
 
 # load images
 img_btc = Image.open(source_directory_resources + "btc.png")
