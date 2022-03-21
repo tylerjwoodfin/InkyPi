@@ -14,7 +14,7 @@ from securedata import securedata\
 # variables
 source_directory = os.path.dirname(os.path.realpath(__file__)) + "/"
 source_directory_resources = source_directory + "resources/"
-secure_data_directory = securedata.getConfigItem("securePath")
+secure_data_directory = securedata.getConfigItem("path_securedata")
 
 # see documentation for how to change `cloud`
 cloud = "Dropbox:SecureData/settings.json"
