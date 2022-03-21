@@ -28,7 +28,7 @@ parser.add_argument('--color', '-c', type=str, required=False,
                     choices=["red", "black", "yellow"], help="ePaper display color")
 args = parser.parse_args()
 
-color = args.color
+color = args.color or "red"
 
 # Set up the correct display and scaling factors
 print("Checking for InkyWHAT...")
