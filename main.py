@@ -1,15 +1,16 @@
 # /usr/bin/python3
 
-from inky import InkyWHAT
-import requests
-import json
-import argparse
-from PIL import Image, ImageFont, ImageDraw
-import os
 from font_source_sans_pro import SourceSansProSemibold
-import datetime
+from PIL import Image, ImageFont, ImageDraw
+from securedata import securedata, mail
 from inky.auto import auto
-from securedata import securedata\
+from inky import InkyWHAT
+import traceback
+import requests
+import argparse
+import datetime
+import json
+import os
 
 # variables
 source_directory = os.path.dirname(os.path.realpath(__file__)) + "/"
@@ -102,7 +103,9 @@ try:
     else:
         img.paste(img_plant_unknown, (300, 190))
 except Exception as e:
-    draw.text((20, 25), f"Error:\n{e}", inky_display.RED, font=font_price)
+    traceback.print_exc()
+    mail.send("InkyPi Error", traceback.format_exc())
+    draw.text((20, 25), f"Error:\n{e}", inky_display.RED, font=font_baseline)
 
 # display
 inky_display.set_image(img)
