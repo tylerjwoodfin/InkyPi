@@ -76,12 +76,20 @@ img_plant_unknown = Image.open(
 img_weather = Image.open(source_directory_resources +
                          f"weather/{weather_data['current_conditions_icon']}.png")
 
+# temperature
+temperature = weather_data.get('current_temperature') or "--"
+temperature_font_size = 95
+
+if type(temperature) == int and (temperature >= 100 or temperature <= -10):
+    temperature_font_size = 80
+
 # load fonts
 font_baseline = ImageFont.truetype(SourceSansProSemibold, 24)
 font_header = ImageFont.truetype(SourceSansProSemibold, 35)
 font_price = ImageFont.truetype(SourceSansProSemibold, 55)
 font_price_label = ImageFont.truetype(SourceSansProSemibold, 20)
-font_temperature = ImageFont.truetype(SourceSansProSemibold, 95)
+font_temperature = ImageFont.truetype(
+    SourceSansProSemibold, temperature_font_size)
 font_divider = ImageFont.truetype(SourceSansProSemibold, 70)
 
 # add elements to backdrop
@@ -91,7 +99,7 @@ try:
     draw.text((20, 65), f"Updated at {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
               inky_display.BLACK, font=font_baseline)
 
-    draw.text((20, 160), f"{weather_data['current_temperature']}°",
+    draw.text((20, 160), f"{temperature}°",
               inky_display.BLACK, font=font_temperature)
     img.paste(img_weather, (170, 190))
 
