@@ -17,12 +17,6 @@ source_directory = os.path.dirname(os.path.realpath(__file__)) + "/"
 source_directory_resources = source_directory + "resources/"
 secure_data_directory = securedata.getConfigItem("path_securedata")
 
-# see documentation for how to change `cloud`
-cloud = "Dropbox:SecureData/settings.json"
-
-# pull from cloud
-os.system(f"rclone copyto {cloud} {secure_data_directory}/settings.json")
-
 # parse arguments
 parser = argparse.ArgumentParser()
 parser.add_argument('--color', '-c', type=str, required=False,
@@ -68,6 +62,7 @@ def getCoinPrice():
 # load SecureData
 planty_status = securedata.getItem("planty", "status")
 weather_data = securedata.getItem("weather", "data")
+steps = f"{securedata.getItem('steps')} steps"
 
 # load images
 img_btc = Image.open(source_directory_resources + "btc.png")
@@ -98,22 +93,22 @@ font_divider = ImageFont.truetype(SourceSansProSemibold, 70)
 
 # add elements to backdrop
 try:
+    draw.text((20, 60), steps, inky_display.BLACK, font=font_price)
     draw.text((20, 0), f"BTC ${str('{:,.2f}'.format(float(getCoinPrice())))}",
               inky_display.BLACK, font=font_price)
-    draw.text((20, 65), f"Updated at {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
-              inky_display.BLACK, font=font_baseline)
-
-    draw.text((20, 160), f"{temperature}°",
+    draw.text((20, 130), f"{temperature}°",
               inky_display.BLACK, font=font_temperature)
-    img.paste(img_weather, (170, 190))
+    img.paste(img_weather, (170, 160))
 
-    draw.text((265, 175), "|", inky_display.RED, font=font_divider)
+    draw.text((265, 145), "|", inky_display.RED, font=font_divider)
+    draw.text((20, 260), f"Updated at {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+              inky_display.BLACK, font=font_baseline)
     if planty_status == 'in':
-        img.paste(img_plant_inside, (300, 190))
+        img.paste(img_plant_inside, (300, 160))
     elif planty_status == 'out':
-        img.paste(img_plant_outside, (300, 190))
+        img.paste(img_plant_outside, (300, 160))
     else:
-        img.paste(img_plant_unknown, (300, 190))
+        img.paste(img_plant_unknown, (300, 160))
 except Exception as e:
     traceback.print_exc()
     mail.send("InkyPi Error", traceback.format_exc())
