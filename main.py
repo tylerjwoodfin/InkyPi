@@ -59,10 +59,15 @@ def getCoinPrice():
         return latest_price_stored
 
 
-# load SecureData
+# load securedata
 planty_status = securedata.getItem("planty", "status")
 weather_data = securedata.getItem("weather", "data")
-steps = f"{securedata.getItem('steps')} steps"
+
+# steps
+steps = 'No steps found'
+steps_data = securedata.getFileAsArray('steps.md', secure_data_directory)
+if len(steps_data) > 0:
+    steps = f"{steps_data[0]} today"
 
 # load images
 img_btc = Image.open(source_directory_resources + "btc.png")
@@ -86,6 +91,7 @@ if type(temperature) == int and (temperature >= 100 or temperature <= -10):
 font_baseline = ImageFont.truetype(SourceSansProSemibold, 24)
 font_header = ImageFont.truetype(SourceSansProSemibold, 35)
 font_price = ImageFont.truetype(SourceSansProSemibold, 55)
+font_steps = ImageFont.truetype(SourceSansProSemibold, 40)
 font_price_label = ImageFont.truetype(SourceSansProSemibold, 20)
 font_temperature = ImageFont.truetype(
     SourceSansProSemibold, temperature_font_size)
@@ -93,7 +99,8 @@ font_divider = ImageFont.truetype(SourceSansProSemibold, 70)
 
 # add elements to backdrop
 try:
-    draw.text((20, 60), steps, inky_display.BLACK, font=font_price)
+    print("Drawing...")
+    draw.text((20, 60), steps, inky_display.BLACK, font=font_steps)
     draw.text((20, 0), f"BTC ${str('{:,.2f}'.format(float(getCoinPrice())))}",
               inky_display.BLACK, font=font_price)
     draw.text((20, 130), f"{temperature}°",
