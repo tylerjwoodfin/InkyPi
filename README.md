@@ -17,8 +17,6 @@ This project is not self-sustained and is published for academic purposes rather
   - `python -m pip install font-source-sans-pro`
 - [font-source-sans-pro](https://pypi.org/project/font-source-sans-pro/)
   - `python -m pip install font-source-sans-pro`
-- [rclone](https://rclone.org/install/) (optional)
-  - Used to sync data between local devices and cloud repos, such as Dropbox
 
 ## Sources
 
