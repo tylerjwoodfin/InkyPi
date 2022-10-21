@@ -46,17 +46,23 @@ draw = ImageDraw.Draw(img)
 def getCoinPrice():
     endpoint = "https://api.kraken.com/0/public/Ticker?pair=XXBTZUSD"
     latest_price_stored = securedata.getFileAsArray(
-        "BTC_LATEST_PRICE", ignoreNotFound=True) or "0"
+        "BTC_LATEST_PRICE", ignoreNotFound=True) or ['0']
     try:
         r = requests.get(endpoint)
         json_data = r.text
         fj = json.loads(json_data)
         latest_price_float = fj["result"]["XXBTZUSD"]["c"][0]
+        print(f"Found price: {latest_price_float}")
         securedata.writeFile("BTC_LATEST_PRICE", content=latest_price_float)
         return "{:.2f}".format(float(latest_price_float))
+    except KeyError:
+        print("API - KeyError")
+        print(f"Returning {latest_price_stored[0]}")
+        return latest_price_stored[0]
     except requests.ConnectionError:
         print("API - ERROR")
-        return latest_price_stored
+        print(f"Returning {latest_price_stored[0]}")
+        return latest_price_stored[0]
 
 
 # load securedata
