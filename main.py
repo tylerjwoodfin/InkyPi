@@ -50,10 +50,14 @@ def getCoinPrice():
     try:
         r = requests.get(endpoint)
         json_data = r.text
-        fj = json.loads(json_data)
-        latest_price_float = fj["result"]["XXBTZUSD"]["c"][0]
-        securedata.writeFile("BTC_LATEST_PRICE", content=latest_price_float)
-        return "{:.2f}".format(float(latest_price_float))
+
+        if json_data and len(json_data) > 0:
+            fj = json.loads(json_data)
+            latest_price_float = fj["result"]["XXBTZUSD"]["c"][0]
+            securedata.writeFile("BTC_LATEST_PRICE", content=latest_price_float)
+            return "{:.2f}".format(float(latest_price_float))
+        else:
+            return latest_price_stored
     except requests.ConnectionError:
         print("API - ERROR")
         return latest_price_stored
