@@ -43,20 +43,24 @@ draw = ImageDraw.Draw(img)
 # get current BTC price from Kraken API
 
 
-def getCoinPrice():
+def get_coin_price():
+    """
+    gets the current Bitcoin price
+    """
+
     endpoint = "https://api.kraken.com/0/public/Ticker?pair=XXBTZUSD"
     latest_price_stored = securedata.getFileAsArray(
         "BTC_LATEST_PRICE", ignoreNotFound=True) or ['0']
     try:
-        r = requests.get(endpoint)
-        json_data = r.text
+        response = requests.get(endpoint, timeout=30)
+        json_data = response.text
 
         if json_data and len(json_data) > 0:
-            fj = json.loads(json_data)
-            latest_price_float = fj["result"]["XXBTZUSD"]["c"][0]
+            json_data_formatted = json.loads(json_data)
+            latest_price_float = json_data_formatted["result"]["XXBTZUSD"]["c"][0]
             print(f"Found price: {latest_price_float}")
             securedata.writeFile("BTC_LATEST_PRICE", content=latest_price_float)
-            return "{:.2f}".format(float(latest_price_float))
+            return f"{float(latest_price_float)}"
     except KeyError:
         print("API - KeyError")
         print(f"Returning {latest_price_stored[0]}")
@@ -68,10 +72,10 @@ planty_status = securedata.getItem("planty", "status")
 weather_data = securedata.getItem("weather", "data")
 
 # steps
-steps = 'No steps found'
+STEPS = 'No steps found'
 steps_data = securedata.getFileAsArray('steps.md', secure_data_directory)
 if len(steps_data) > 0:
-    steps = f"{steps_data[0]} today"
+    STEPS = f"{steps_data[0]} today"
 
 # load images
 img_btc = Image.open(source_directory_resources + "btc.png")
@@ -86,10 +90,10 @@ img_weather = Image.open(source_directory_resources +
 
 # temperature
 temperature = weather_data.get('current_temperature') or "--"
-temperature_font_size = 95
+TEMPERATURE_FONT_SIZE = 95
 
-if type(temperature) == int and (temperature >= 100 or temperature <= -10):
-    temperature_font_size = 80
+if isinstance(temperature, int) and (temperature >= 100 or temperature <= -10):
+    TEMPERATURE_FONT_SIZE = 80
 
 # load fonts
 font_baseline = ImageFont.truetype(SourceSansProSemibold, 24)
@@ -98,14 +102,14 @@ font_price = ImageFont.truetype(SourceSansProSemibold, 55)
 font_steps = ImageFont.truetype(SourceSansProSemibold, 40)
 font_price_label = ImageFont.truetype(SourceSansProSemibold, 20)
 font_temperature = ImageFont.truetype(
-    SourceSansProSemibold, temperature_font_size)
+    SourceSansProSemibold, TEMPERATURE_FONT_SIZE)
 font_divider = ImageFont.truetype(SourceSansProSemibold, 70)
 
 # add elements to backdrop
 try:
     print("Drawing...")
-    draw.text((20, 60), steps, inky_display.BLACK, font=font_steps)
-    draw.text((20, 0), f"BTC ${str('{:,.2f}'.format(float(getCoinPrice())))}",
+    draw.text((20, 60), STEPS, inky_display.BLACK, font=font_steps)
+    draw.text((20, 0), f"BTC ${float(get_coin_price())}",
               inky_display.BLACK, font=font_price)
     draw.text((20, 130), f"{temperature}°",
               inky_display.BLACK, font=font_temperature)
