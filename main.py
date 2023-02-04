@@ -60,7 +60,8 @@ def get_coin_price():
             latest_price_float = json_data_formatted["result"]["XXBTZUSD"]["c"][0]
             print(f"Found price: {latest_price_float}")
             securedata.writeFile("BTC_LATEST_PRICE", content=latest_price_float)
-            return f"{float(latest_price_float)}"
+            return f"{float(latest_price_float):.2f}"
+
     except KeyError:
         print("API - KeyError")
         print(f"Returning {latest_price_stored[0]}")
