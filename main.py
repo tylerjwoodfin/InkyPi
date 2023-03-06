@@ -58,15 +58,14 @@ def get_coin_price():
         if json_data and len(json_data) > 0:
             json_data_formatted = json.loads(json_data)
             latest_price_float = json_data_formatted["result"]["XXBTZUSD"]["c"][0]
-            print(f"Found price: {latest_price_float}")
+            print(f"Found price: {float(latest_price_float):,.2f}")
             cabinet.write_file("BTC_LATEST_PRICE", content=latest_price_float)
-            return f"{float(latest_price_float):.2f}"
+            return f"{float(latest_price_float):,.2f}"
 
     except KeyError:
         print("API - KeyError")
         print(f"Returning {latest_price_stored[0]}")
         return latest_price_stored[0]
-
 
 # load cabinet
 planty_status = cabinet.get("planty", "status")
@@ -110,7 +109,7 @@ font_divider = ImageFont.truetype(SourceSansProSemibold, 70)
 try:
     print("Drawing...")
     draw.text((20, 60), STEPS, inky_display.BLACK, font=font_steps)
-    draw.text((20, 0), f"BTC ${float(get_coin_price())}",
+    draw.text((20, 0), f"BTC ${get_coin_price()}",
               inky_display.BLACK, font=font_price)
     draw.text((20, 130), f"{temperature}°",
               inky_display.BLACK, font=font_temperature)
