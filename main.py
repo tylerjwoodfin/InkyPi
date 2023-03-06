@@ -2,7 +2,7 @@
 
 from font_source_sans_pro import SourceSansProSemibold
 from PIL import Image, ImageFont, ImageDraw
-from securedata import securedata, mail
+from cabinet import cabinet, mail
 from inky.auto import auto
 from inky import InkyWHAT
 import traceback
@@ -15,7 +15,7 @@ import os
 # variables
 source_directory = os.path.dirname(os.path.realpath(__file__)) + "/"
 source_directory_resources = source_directory + "resources/"
-secure_data_directory = securedata.getConfigItem("path_securedata")
+secure_data_directory = cabinet.get_config("path_cabinet")
 
 # parse arguments
 parser = argparse.ArgumentParser()
@@ -49,8 +49,8 @@ def get_coin_price():
     """
 
     endpoint = "https://api.kraken.com/0/public/Ticker?pair=XXBTZUSD"
-    latest_price_stored = securedata.getFileAsArray(
-        "BTC_LATEST_PRICE", ignoreNotFound=True) or ['0']
+    latest_price_stored = cabinet.get_file_as_array(
+        "BTC_LATEST_PRICE", ignore_not_found=True) or ['0']
     try:
         response = requests.get(endpoint, timeout=30)
         json_data = response.text
@@ -59,7 +59,7 @@ def get_coin_price():
             json_data_formatted = json.loads(json_data)
             latest_price_float = json_data_formatted["result"]["XXBTZUSD"]["c"][0]
             print(f"Found price: {latest_price_float}")
-            securedata.writeFile("BTC_LATEST_PRICE", content=latest_price_float)
+            cabinet.write_file("BTC_LATEST_PRICE", content=latest_price_float)
             return f"{float(latest_price_float):.2f}"
 
     except KeyError:
@@ -68,13 +68,13 @@ def get_coin_price():
         return latest_price_stored[0]
 
 
-# load securedata
-planty_status = securedata.getItem("planty", "status")
-weather_data = securedata.getItem("weather", "data")
+# load cabinet
+planty_status = cabinet.get("planty", "status")
+weather_data = cabinet.get("weather", "data")
 
 # steps
 STEPS = 'No steps found'
-steps_data = securedata.getFileAsArray('steps.md', secure_data_directory)
+steps_data = cabinet.get_file_as_array('steps.md', secure_data_directory)
 if len(steps_data) > 0:
     STEPS = f"{steps_data[0]} today"
 

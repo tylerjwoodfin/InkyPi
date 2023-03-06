@@ -12,7 +12,7 @@ Little experiments for my [Inky wHAT e-ink display](https://thepihut.com/product
 This project is not self-sustained and is published for academic purposes rather than "cloning and running". It relies on certain files from the dependencies below.
 
 - [Inky Library](https://learn.pimoroni.com/article/getting-started-with-inky-what)
-- [Secure Data](https://github.com/tylerjwoodfin/securedata)
+- [cabinet](https://pypi.org/project/cabinet/)
   - Used to store project data across multiple repos and provides easy file access
   - `python -m pip install font-source-sans-pro`
 - [font-source-sans-pro](https://pypi.org/project/font-source-sans-pro/)
