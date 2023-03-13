@@ -62,8 +62,8 @@ def get_coin_price():
             cabinet.write_file("BTC_LATEST_PRICE", content=latest_price_float)
             return f"{float(latest_price_float):,.2f}"
 
-    except KeyError:
-        print("API - KeyError")
+    except (KeyError, requests.exceptions.Timeout) as e:
+        print("API - KeyError", e)
         print(f"Returning {latest_price_stored[0]}")
         return latest_price_stored[0]
 
