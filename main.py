@@ -1,5 +1,9 @@
 # /usr/bin/python3
 
+"""
+Displays the temperature and other prudent information on an e-ink screen; see README.md for details
+"""
+
 import os
 import json
 import traceback
@@ -142,4 +146,3 @@ except Exception as e:
 # display
 inky_display.set_image(img)
 inky_display.show()
-
