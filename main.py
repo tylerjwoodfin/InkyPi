@@ -1,29 +1,33 @@
 # /usr/bin/python3
 
-from font_source_sans_pro import SourceSansProSemibold
-from PIL import Image, ImageFont, ImageDraw
-from cabinet import cabinet, mail
-from inky.auto import auto
-from inky import InkyWHAT
+import os
+import json
 import traceback
-import requests
 import argparse
 import datetime
-import json
-import os
+import requests
+from inky import InkyWHAT
+from PIL import Image, ImageFont, ImageDraw
+from cabinet import cabinet, mail
+from font_source_sans_pro import SourceSansProSemibold
 
 # variables
-source_directory = os.path.dirname(os.path.realpath(__file__)) + "/"
-source_directory_resources = source_directory + "resources/"
-secure_data_directory = cabinet.get_config("path_cabinet")
+directory_source = os.path.dirname(os.path.realpath(__file__)) + "/"
+directory_resources = directory_source + "resources/"
+
+# get weather inside
+file_weather_inside = json.loads(''.join(
+    cabinet.get_file_as_array("weather.json", cabinet.PATH_CABINET)))
+temperature_in_c = file_weather_inside["temperature"] or 537.222
+temperature_in = round(temperature_in_c * 9/5 + 32, 1)
 
 # parse arguments
 parser = argparse.ArgumentParser()
 parser.add_argument('--color', '-c', type=str, required=False,
                     choices=["red", "black", "yellow"], help="ePaper display color")
-args = parser.parse_args()
+ARGS = parser.parse_args()
 
-color = args.color or "red"
+color = ARGS.color or "red"
 
 # Set up the correct display and scaling factors
 print("Checking for InkyWHAT...")
@@ -62,8 +66,8 @@ def get_coin_price():
             cabinet.write_file("BTC_LATEST_PRICE", content=latest_price_float)
             return f"{float(latest_price_float):,.2f}"
 
-    except (KeyError, requests.exceptions.Timeout) as e:
-        print("API - KeyError", e)
+    except (KeyError, requests.exceptions.Timeout) as error:
+        print("API - KeyError", error)
         print(f"Returning {latest_price_stored[0]}")
         return latest_price_stored[0]
 
@@ -73,26 +77,26 @@ weather_data = cabinet.get("weather", "data")
 
 # steps
 STEPS = 'No steps found'
-steps_data = cabinet.get_file_as_array('steps.md', secure_data_directory)
+steps_data = cabinet.get_file_as_array('steps.md', cabinet.PATH_CABINET)
 if len(steps_data) > 0:
     STEPS = f"{steps_data[0]} today"
 
 # load images
-img_btc = Image.open(source_directory_resources + "btc.png")
+img_btc = Image.open(directory_resources + "btc.png")
 img_plant_inside = Image.open(
-    source_directory_resources + "icon-plant-inside.png")
+    directory_resources + "icon-plant-inside.png")
 img_plant_outside = Image.open(
-    source_directory_resources + "icon-plant-outside.png")
+    directory_resources + "icon-plant-outside.png")
 img_plant_unknown = Image.open(
-    source_directory_resources + "icon-plant-unknown.png")
-img_weather = Image.open(source_directory_resources +
+    directory_resources + "icon-plant-unknown.png")
+img_weather = Image.open(directory_resources +
                          f"weather/{weather_data['current_conditions_icon']}.png")
 
 # temperature
-temperature = weather_data.get('current_temperature') or "--"
+temperature_out = weather_data.get('current_temperature') or "--"
 TEMPERATURE_FONT_SIZE = 50
 
-if isinstance(temperature, int) and (temperature >= 100 or temperature <= -10):
+if isinstance(temperature_out, int) and (temperature_out >= 100 or temperature_out <= -10):
     TEMPERATURE_FONT_SIZE -= 15
 
 TEMPERATURE_FONT_SIZE_OUTSIDE = TEMPERATURE_FONT_SIZE + 30
@@ -115,9 +119,9 @@ try:
     draw.text((20, 60), STEPS, inky_display.BLACK, font=font_steps)
     draw.text((20, 0), f"BTC ${get_coin_price()}",
               inky_display.BLACK, font=font_price)
-    draw.text((40, 100), f"{temperature}°",
+    draw.text((40, 100), f"{temperature_out}°",
                   inky_display.BLACK, font=font_temperature_outside)
-    draw.text((55, 190), f"{temperature}°",
+    draw.text((40, 190), f"{temperature_in}°",
                   inky_display.RED, font=font_temperature)
     img.paste(img_weather, (170, 160))
 
@@ -138,3 +142,4 @@ except Exception as e:
 # display
 inky_display.set_image(img)
 inky_display.show()
+
