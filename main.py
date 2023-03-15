@@ -90,10 +90,12 @@ img_weather = Image.open(source_directory_resources +
 
 # temperature
 temperature = weather_data.get('current_temperature') or "--"
-TEMPERATURE_FONT_SIZE = 95
+TEMPERATURE_FONT_SIZE = 50
 
 if isinstance(temperature, int) and (temperature >= 100 or temperature <= -10):
-    TEMPERATURE_FONT_SIZE = 80
+    TEMPERATURE_FONT_SIZE -= 15
+
+TEMPERATURE_FONT_SIZE_OUTSIDE = TEMPERATURE_FONT_SIZE + 30
 
 # load fonts
 font_baseline = ImageFont.truetype(SourceSansProSemibold, 24)
@@ -103,6 +105,8 @@ font_steps = ImageFont.truetype(SourceSansProSemibold, 40)
 font_price_label = ImageFont.truetype(SourceSansProSemibold, 20)
 font_temperature = ImageFont.truetype(
     SourceSansProSemibold, TEMPERATURE_FONT_SIZE)
+font_temperature_outside = ImageFont.truetype(
+    SourceSansProSemibold, TEMPERATURE_FONT_SIZE_OUTSIDE)
 font_divider = ImageFont.truetype(SourceSansProSemibold, 70)
 
 # add elements to backdrop
@@ -111,8 +115,10 @@ try:
     draw.text((20, 60), STEPS, inky_display.BLACK, font=font_steps)
     draw.text((20, 0), f"BTC ${get_coin_price()}",
               inky_display.BLACK, font=font_price)
-    draw.text((20, 130), f"{temperature}°",
-              inky_display.BLACK, font=font_temperature)
+    draw.text((40, 100), f"{temperature}°",
+                  inky_display.BLACK, font=font_temperature_outside)
+    draw.text((55, 190), f"{temperature}°",
+                  inky_display.RED, font=font_temperature)
     img.paste(img_weather, (170, 160))
 
     draw.text((265, 145), "|", inky_display.RED, font=font_divider)
