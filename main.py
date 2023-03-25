@@ -23,7 +23,7 @@ directory_resources = directory_source + "resources/"
 
 # get weather inside
 file_weather_inside = json.loads(''.join(
-    cab.get_file_as_array("weather.json", cab.PATH_CABINET)))
+    cab.get_file_as_array("weather.json", cab.path_cabinet)))
 temperature_in_c = file_weather_inside["temperature"] or 537.222
 temperature_in = round(temperature_in_c * 9/5 + 32, 1)
 
@@ -83,7 +83,7 @@ weather_data = cab.get("weather", "data")
 
 # steps
 STEPS = 'No steps found'
-steps_data = cab.get_file_as_array('steps.md', cab.PATH_CABINET)
+steps_data = cab.get_file_as_array('steps.md', cab.path_cabinet)
 if len(steps_data) > 0:
     STEPS = f"{steps_data[0]} today"
 
