@@ -12,8 +12,10 @@ import datetime
 import requests
 from inky import InkyWHAT
 from PIL import Image, ImageFont, ImageDraw
-from cabinet import cabinet, mail
+from cabinet import Cabinet, mail
 from font_source_sans_pro import SourceSansProSemibold
+
+cab = Cabinet()
 
 # variables
 directory_source = os.path.dirname(os.path.realpath(__file__)) + "/"
@@ -21,7 +23,7 @@ directory_resources = directory_source + "resources/"
 
 # get weather inside
 file_weather_inside = json.loads(''.join(
-    cabinet.get_file_as_array("weather.json", cabinet.PATH_CABINET)))
+    cab.get_file_as_array("weather.json", cab.PATH_CABINET)))
 temperature_in_c = file_weather_inside["temperature"] or 537.222
 temperature_in = round(temperature_in_c * 9/5 + 32, 1)
 
@@ -57,7 +59,7 @@ def get_coin_price():
     """
 
     endpoint = "https://api.kraken.com/0/public/Ticker?pair=XXBTZUSD"
-    latest_price_stored = cabinet.get_file_as_array(
+    latest_price_stored = cab.get_file_as_array(
         "BTC_LATEST_PRICE", ignore_not_found=True) or ['0']
     try:
         response = requests.get(endpoint, timeout=30)
@@ -67,7 +69,7 @@ def get_coin_price():
             json_data_formatted = json.loads(json_data)
             latest_price_float = json_data_formatted["result"]["XXBTZUSD"]["c"][0]
             print(f"Found price: {float(latest_price_float):,.2f}")
-            cabinet.write_file("BTC_LATEST_PRICE", content=latest_price_float)
+            cab.write_file("BTC_LATEST_PRICE", content=latest_price_float)
             return f"{float(latest_price_float):,.2f}"
 
     except (KeyError, requests.exceptions.Timeout) as error:
@@ -76,12 +78,12 @@ def get_coin_price():
         return latest_price_stored[0]
 
 # load cabinet
-planty_status = cabinet.get("planty", "status")
-weather_data = cabinet.get("weather", "data")
+planty_status = cab.get("planty", "status")
+weather_data = cab.get("weather", "data")
 
 # steps
 STEPS = 'No steps found'
-steps_data = cabinet.get_file_as_array('steps.md', cabinet.PATH_CABINET)
+steps_data = cab.get_file_as_array('steps.md', cab.PATH_CABINET)
 if len(steps_data) > 0:
     STEPS = f"{steps_data[0]} today"
 
