@@ -5,10 +5,12 @@ Displays the temperature and other prudent information on an e-ink screen; see R
 """
 
 import os
+import sys
 import json
 import traceback
 import argparse
 import datetime
+from datetime import datetime
 import requests
 from inky import InkyWHAT
 from PIL import Image, ImageFont, ImageDraw
@@ -17,14 +19,62 @@ from font_source_sans_pro import SourceSansProSemibold
 
 cab = Cabinet()
 
+def get_latest_weather_file():
+    """
+    Get the name of the latest weather file in the 'weather' folder of cabinet.
+
+    Returns:
+        str: The name of the latest file in the format 'weather YYYY-MM-DD.json',
+        or None if no such file is found.
+
+    Raises:
+        None.
+    """
+    folder_path = cab.path_cabinet + "/weather"
+
+    # Get a list of all files in the folder
+    try:
+        files = os.listdir(folder_path)
+    except FileNotFoundError:
+        cab.log(f"No weather files found in {folder_path}")
+        return None
+
+    # Filter out any files that don't start with "weather "
+    files = [f for f in files if f.startswith("weather ")]
+
+    # Convert the file names to datetime objects
+    dates = [datetime.strptime(f[8:-5], "%Y-%m-%d") for f in files]
+
+    # Get the index of the latest date
+    latest_index = dates.index(max(dates))
+
+    # Get the name of the latest file
+    latest_file = files[latest_index]
+
+    return latest_file or -1
+
 # variables
+TODAY = str(datetime.today().strftime('%Y-%m-%d'))
 directory_source = os.path.dirname(os.path.realpath(__file__)) + "/"
 directory_resources = directory_source + "resources/"
+FILE_WEATHER_ARRAY = cab.get_file_as_array(
+    get_latest_weather_file(), cab.path_cabinet + "/weather", ignore_not_found=True)
+
+if FILE_WEATHER_ARRAY is None:
+    cab.log(f"Could not find `weather {TODAY}.json`")
+    sys.exit(-1)
+
+FILE_WEATHER = ''.join(FILE_WEATHER_ARRAY)
+
+# filter trailing comma, if needed
+if FILE_WEATHER.endswith(','):
+    FILE_WEATHER = FILE_WEATHER[:-1]
+
+FILE_WEATHER = f"[{FILE_WEATHER}]"
 
 # get weather inside
-file_weather_inside = json.loads(''.join(
-    cab.get_file_as_array("weather.json", cab.path_cabinet)))
-temperature_in_c = file_weather_inside["temperature"] or 537.222
+file_weather_inside = json.loads(FILE_WEATHER)
+temperature_in_c = file_weather_inside[-1]["temperature"] or 537.222
 temperature_in = round(temperature_in_c * 9/5 + 32, 1)
 
 # parse arguments
@@ -77,6 +127,7 @@ def get_coin_price():
         print(f"Returning {latest_price_stored[0]}")
         return latest_price_stored[0]
 
+
 # load cabinet
 planty_status = cab.get("planty", "status")
 weather_data = cab.get("weather", "data")
@@ -126,13 +177,13 @@ try:
     draw.text((20, 0), f"BTC ${get_coin_price()}",
               inky_display.BLACK, font=font_price)
     draw.text((40, 100), f"{temperature_out}°",
-                  inky_display.BLACK, font=font_temperature_outside)
+              inky_display.BLACK, font=font_temperature_outside)
     draw.text((40, 190), f"{temperature_in}°",
-                  inky_display.RED, font=font_temperature)
+              inky_display.RED, font=font_temperature)
     img.paste(img_weather, (170, 160))
 
     draw.text((265, 145), "|", inky_display.RED, font=font_divider)
-    draw.text((20, 260), f"Updated at {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+    draw.text((20, 260), f"Updated at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
               inky_display.BLACK, font=font_baseline)
     if planty_status == 'in':
         img.paste(img_plant_inside, (300, 160))
