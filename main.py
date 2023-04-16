@@ -14,10 +14,11 @@ from datetime import datetime
 import requests
 from inky import InkyWHAT
 from PIL import Image, ImageFont, ImageDraw
-from cabinet import Cabinet, mail
+from cabinet import Cabinet, Mail
 from font_source_sans_pro import SourceSansProSemibold
 
 cab = Cabinet()
+mail = Mail()
 
 def get_latest_weather_file():
     """
