@@ -12,6 +12,7 @@ import argparse
 import datetime
 from datetime import datetime
 import requests
+# pylint: disable=import-error
 from inky import InkyWHAT
 from PIL import Image, ImageFont, ImageDraw
 from font_source_sans_pro import SourceSansProSemibold
