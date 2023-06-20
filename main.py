@@ -14,11 +14,12 @@ from datetime import datetime
 import requests
 from inky import InkyWHAT
 from PIL import Image, ImageFont, ImageDraw
-from cabinet import Cabinet, Mail
 from font_source_sans_pro import SourceSansProSemibold
+from cabinet import Cabinet, Mail
 
 cab = Cabinet()
 mail = Mail()
+
 
 def get_latest_weather_file():
     """
@@ -54,6 +55,7 @@ def get_latest_weather_file():
 
     return latest_file or -1
 
+
 # variables
 TODAY = str(datetime.today().strftime('%Y-%m-%d'))
 directory_source = os.path.dirname(os.path.realpath(__file__)) + "/"
@@ -74,8 +76,8 @@ if FILE_WEATHER.endswith(','):
 FILE_WEATHER = f"[{FILE_WEATHER}]"
 
 # get weather inside
-file_weather_inside = json.loads(FILE_WEATHER)
-temperature_in_c = file_weather_inside[-1]["temperature"] or 537.222
+file_weather = json.loads(FILE_WEATHER)
+temperature_in_c = file_weather[-1]["temperature"] or 537.222
 temperature_in = round(temperature_in_c * 9/5 + 32, 1)
 
 # parse arguments
@@ -151,10 +153,15 @@ img_weather = Image.open(directory_resources +
                          f"weather/{weather_data['current_conditions_icon']}.png")
 
 # temperature
-temperature_out = weather_data.get('current_temperature') or "--"
+try:
+    TEMPERATURE_OUT = round(
+        (file_weather[-1]["weather_data"]["current_temperature"] - 273.15) * 9/5 + 32)
+except (KeyError, IndexError):
+    TEMPERATURE_OUT = "--"
+
 TEMPERATURE_FONT_SIZE = 50
 
-if isinstance(temperature_out, int) and (temperature_out >= 100 or temperature_out <= -10):
+if isinstance(TEMPERATURE_OUT, int) and (TEMPERATURE_OUT >= 100 or TEMPERATURE_OUT <= -10):
     TEMPERATURE_FONT_SIZE -= 15
 
 TEMPERATURE_FONT_SIZE_OUTSIDE = TEMPERATURE_FONT_SIZE + 30
@@ -177,7 +184,7 @@ try:
     draw.text((20, 60), STEPS, inky_display.BLACK, font=font_steps)
     draw.text((20, 0), f"BTC ${get_coin_price()}",
               inky_display.BLACK, font=font_price)
-    draw.text((40, 100), f"{temperature_out}°",
+    draw.text((40, 100), f"{TEMPERATURE_OUT}°",
               inky_display.BLACK, font=font_temperature_outside)
     draw.text((40, 190), f"{temperature_in}°",
               inky_display.RED, font=font_temperature)
@@ -192,10 +199,11 @@ try:
         img.paste(img_plant_outside, (300, 160))
     else:
         img.paste(img_plant_unknown, (300, 160))
-except Exception as e:
+except (IndexError, KeyError) as e:
     traceback.print_exc()
     mail.send("InkyPi Error", traceback.format_exc())
     draw.text((20, 25), f"Error:\n{e}", inky_display.RED, font=font_baseline)
+
 
 # display
 inky_display.set_image(img)
