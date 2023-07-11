@@ -43,7 +43,7 @@ def get_latest_weather_file():
         return None
 
     # Filter out any files that don't start with "weather "
-    files = [f for f in files if f.startswith("weather ")]
+    files = [f for f in files if f.startswith("weather ") and f.endswith(".json")]
 
     # Convert the file names to datetime objects
     dates = [datetime.strptime(f[8:-5], "%Y-%m-%d") for f in files]
@@ -163,7 +163,7 @@ except (KeyError, IndexError):
 TEMPERATURE_FONT_SIZE = 50
 
 if isinstance(TEMPERATURE_OUT, int) and (TEMPERATURE_OUT >= 100 or TEMPERATURE_OUT <= -10):
-    TEMPERATURE_FONT_SIZE -= 15
+    TEMPERATURE_FONT_SIZE -= 5
 
 TEMPERATURE_FONT_SIZE_OUTSIDE = TEMPERATURE_FONT_SIZE + 30
 
@@ -189,7 +189,7 @@ try:
               inky_display.BLACK, font=font_temperature_outside)
     draw.text((40, 190), f"{temperature_in}°",
               inky_display.RED, font=font_temperature)
-    img.paste(img_weather, (170, 160))
+    img.paste(img_weather, (185, 160))
 
     draw.text((265, 145), "|", inky_display.RED, font=font_divider)
     draw.text((20, 260), f"Updated at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
