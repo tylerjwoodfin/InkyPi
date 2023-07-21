@@ -43,7 +43,7 @@ def get_latest_weather_file():
         return None
 
     # Filter out any files that don't start with "weather "
-    files = [f for f in files if f.startswith("weather ") and f.endswith(".json")]
+    files = [f for f in files if f.startswith("weather ") and f.endswith(".json") and 'sync-conflict' not in f]
 
     # Convert the file names to datetime objects
     dates = [datetime.strptime(f[8:-5], "%Y-%m-%d") for f in files]
