@@ -138,9 +138,11 @@ weather_data = cab.get("weather", "data")
 
 # steps
 STEPS = 'No steps found'
-steps_data = cab.get_file_as_array('steps.md', cab.path_cabinet)
-if len(steps_data) > 0:
-    STEPS = f"{steps_data[0]} today"
+steps_data = cab.get_file_as_array('log_steps.csv', '/home/tyler/syncthing/log')
+if steps_data and len(steps_data) > 0:
+    STEPS = f"{steps_data[-1].split(',')[1]} steps today"
+else:
+    print(f"Steps Not Found")
 
 # load images
 img_btc = Image.open(directory_resources + "btc.png")
