@@ -33,7 +33,7 @@ def get_latest_weather_file():
     Raises:
         None.
     """
-    folder_path = cab.path_cabinet + "/weather"
+    folder_path = cab.path_dir_cabinet + "/weather"
 
     # Get a list of all files in the folder
     try:
@@ -62,7 +62,7 @@ TODAY = str(datetime.today().strftime('%Y-%m-%d'))
 directory_source = os.path.dirname(os.path.realpath(__file__)) + "/"
 directory_resources = directory_source + "resources/"
 FILE_WEATHER_ARRAY = cab.get_file_as_array(
-    get_latest_weather_file(), cab.path_cabinet + "/weather", ignore_not_found=True)
+    get_latest_weather_file(), cab.path_dir_cabinet + "/weather", ignore_not_found=True)
 
 if FILE_WEATHER_ARRAY is None:
     cab.log(f"Could not find `weather {TODAY}.json`")
