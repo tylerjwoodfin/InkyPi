@@ -54,15 +54,21 @@ def get_latest_weather_file():
     # Get the name of the latest file
     latest_file = files[latest_index]
 
-    return latest_file or -1
+    return latest_file or None
 
 
 # variables
 TODAY = str(datetime.today().strftime('%Y-%m-%d'))
 directory_source = os.path.dirname(os.path.realpath(__file__)) + "/"
 directory_resources = directory_source + "resources/"
+LATEST_WEATHER_FILE = get_latest_weather_file()
+
+if LATEST_WEATHER_FILE is None:
+    cab.log("Could not find latest weather file")
+    sys.exit(-1)
+
 FILE_WEATHER_ARRAY = cab.get_file_as_array(
-    get_latest_weather_file(), cab.path_dir_cabinet + "/weather", ignore_not_found=True)
+    LATEST_WEATHER_FILE, cab.path_dir_cabinet + "/weather", ignore_not_found=True)
 
 if FILE_WEATHER_ARRAY is None:
     cab.log(f"Could not find `weather {TODAY}.json`")
@@ -143,6 +149,10 @@ if steps_data and len(steps_data) > 0:
     STEPS = f"{steps_data[-1].split(',')[1]} steps today"
 else:
     print(f"Steps Not Found")
+
+if weather_data is None:
+    cab.log("Could not find weather data", level="error")
+    sys.exit(-1)
 
 # load images
 img_btc = Image.open(directory_resources + "btc.png")
