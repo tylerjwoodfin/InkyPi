@@ -33,7 +33,7 @@ def get_latest_weather_file():
     Raises:
         None.
     """
-    folder_path = cab.path_dir_cabinet + "/weather"
+    folder_path = cab.path_dir_log.rsplit("/", 1)[0] + "/weather"
 
     # Get a list of all files in the folder
     try:
