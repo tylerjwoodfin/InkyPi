@@ -1,223 +1,120 @@
-# /usr/bin/python3
+#!/usr/bin/env python3
 
 """
-Displays the temperature and other prudent information on an e-ink screen; see README.md for details
+Displays a random quote and trash duty information on an e-ink screen.
 """
 
 import os
-import sys
-import json
-import traceback
-import argparse
-import datetime
-from datetime import datetime
+import textwrap
+from datetime import datetime, timedelta
+from typing import Optional
+
 import requests
-# pylint: disable=import-error
 from inky import InkyWHAT
 from PIL import Image, ImageFont, ImageDraw
 from font_source_sans_pro import SourceSansProSemibold
-from cabinet import Cabinet, Mail
 
-cab = Cabinet()
-mail = Mail()
+# Constants
+LAST_UPDATED = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+DIRECTORY_SOURCE = os.path.dirname(os.path.realpath(__file__)) + "/"
+DIRECTORY_RESOURCES = DIRECTORY_SOURCE + "resources/"
+IMG_TRASH_PATH = DIRECTORY_RESOURCES + "icon-trash.png"
+QUOTE_API_URL = "https://zenquotes.io/api/random"
 
+# Load static resources
+try:
+    IMG_TRASH = Image.open(IMG_TRASH_PATH)
+except FileNotFoundError:
+    raise RuntimeError(f"Could not load trash icon from {IMG_TRASH_PATH}")
 
-def get_latest_weather_file():
+def get_trash_week_owner() -> str:
     """
-    Get the name of the latest weather file in the 'weather' folder of cabinet.
+    Determine whose week it is to take out the trash.
+    
+    Trash week alternates every other Thursday, calculated based on
+    the "epoch week" starting from January 1, 1970.
 
     Returns:
-        str: The name of the latest file in the format 'weather YYYY-MM-DD.json',
-        or None if no such file is found.
-
-    Raises:
-        None.
+        str: "Tyler" if the epoch week is even, otherwise "Huy".
     """
-    folder_path = cab.path_dir_log.rsplit("/", 1)[0] + "/weather"
+    today = datetime.today()
+    days_since_thursday = (today.weekday() - 3) % 7
+    last_thursday = today - timedelta(days=days_since_thursday)
 
-    # Get a list of all files in the folder
+    epoch_start = datetime(1970, 1, 1)
+    days_since_epoch = (last_thursday - epoch_start).days
+    epoch_week = days_since_epoch // 7
+
+    return "Tyler" if epoch_week % 2 == 0 else "Huy"
+
+def get_random_quote() -> str:
+    """
+    Fetch a random quote from the ZenQuotes API.
+    
+    If the API request fails, return an error message.
+
+    Returns:
+        str: A formatted quote string wrapped to 30 characters per line.
+    """
     try:
-        files = os.listdir(folder_path)
-    except FileNotFoundError:
-        cab.log(f"No weather files found in {folder_path}")
-        return None
+        response = requests.get(QUOTE_API_URL, timeout=10)
+        response.raise_for_status()  # Raise exception for HTTP errors
+        quote_data = response.json()[0]
+        quote = quote_data["q"]
+        author = quote_data["a"]
+        wrapped_quote = "\n".join(textwrap.wrap(quote, width=30))
+        return f'"{wrapped_quote}"\n- {author}'
+    except (requests.RequestException, KeyError, IndexError) as e:
+        print(f"Error fetching quote: {e}")
+        return "Error fetching quote."
 
-    # Filter out any files that don't start with "weather "
-    files = [f for f in files if f.startswith("weather ") and f.endswith(".json") and 'sync-conflict' not in f]
-
-    # Convert the file names to datetime objects
-    dates = [datetime.strptime(f[8:-5], "%Y-%m-%d") for f in files]
-
-    # Get the index of the latest date
-    latest_index = dates.index(max(dates))
-
-    # Get the name of the latest file
-    latest_file = files[latest_index]
-
-    return latest_file or None
-
-
-# variables
-TODAY = str(datetime.today().strftime('%Y-%m-%d'))
-directory_source = os.path.dirname(os.path.realpath(__file__)) + "/"
-directory_resources = directory_source + "resources/"
-LATEST_WEATHER_FILE = get_latest_weather_file()
-
-if LATEST_WEATHER_FILE is None:
-    cab.log("Could not find latest weather file")
-    sys.exit(-1)
-
-FILE_WEATHER_ARRAY = cab.get_file_as_array(
-    LATEST_WEATHER_FILE, cab.path_dir_cabinet + "/weather", ignore_not_found=True)
-
-if FILE_WEATHER_ARRAY is None:
-    cab.log(f"Could not find `weather {TODAY}.json`")
-    sys.exit(-1)
-
-FILE_WEATHER = ''.join(FILE_WEATHER_ARRAY)
-
-# filter trailing comma, if needed
-if FILE_WEATHER.endswith(','):
-    FILE_WEATHER = FILE_WEATHER[:-1]
-
-FILE_WEATHER = f"[{FILE_WEATHER}]"
-
-# get weather inside
-file_weather = json.loads(FILE_WEATHER)
-temperature_in_c = file_weather[-1]["temperature"] or 537.222
-temperature_in = round(temperature_in_c * 9/5 + 32, 1)
-
-# parse arguments
-parser = argparse.ArgumentParser()
-parser.add_argument('--color', '-c', type=str, required=False,
-                    choices=["red", "black", "yellow"], help="ePaper display color")
-ARGS = parser.parse_args()
-
-color = ARGS.color or "red"
-
-# Set up the correct display and scaling factors
-print("Checking for InkyWHAT...")
-inky_display = InkyWHAT(color)
-print("Found!")
-inky_display.set_border(inky_display.WHITE)
-# inky_display.set_rotation(180)
-
-w = inky_display.WIDTH
-h = inky_display.HEIGHT
-
-# Create a new canvas to draw on
-
-img = Image.new("P", (inky_display.WIDTH, inky_display.HEIGHT))
-draw = ImageDraw.Draw(img)
-
-# get current BTC price from Kraken API
-
-
-def get_coin_price():
+def setup_display(color: str = "red") -> InkyWHAT:
     """
-    gets the current Bitcoin price
+    Set up the InkyWHAT display with the specified color.
+    
+    Args:
+        color (str): The display color mode ("red", "black", or "yellow").
+    
+    Returns:
+        InkyWHAT: The initialized InkyWHAT display object.
     """
+    print("Checking for InkyWHAT...")
+    inky_display = InkyWHAT(color)
+    print("Found!")
+    inky_display.set_border(inky_display.WHITE)
+    return inky_display
 
-    endpoint = "https://api.kraken.com/0/public/Ticker?pair=XXBTZUSD"
-    latest_price_stored = cab.get_file_as_array(
-        "BTC_LATEST_PRICE", ignore_not_found=True) or ['0']
+def main() -> None:
+    """
+    Main function to display trash duty and a random quote on the InkyWHAT.
+    """
+    inky_display = setup_display()
+    img = Image.new("P", (inky_display.WIDTH, inky_display.HEIGHT))
+    draw = ImageDraw.Draw(img)
+
+    # Load fonts
+    font_baseline = ImageFont.truetype(SourceSansProSemibold, 24)
+    font_header = ImageFont.truetype(SourceSansProSemibold, 55)
+    font_quote = ImageFont.truetype(SourceSansProSemibold, 25)
+
+    # Fetch data
+    trash_owner = get_trash_week_owner()
+    quote = get_random_quote()
+
+    # Draw content on the canvas
     try:
-        response = requests.get(endpoint, timeout=30)
-        json_data = response.text
+        print("Drawing...")
+        img.paste(IMG_TRASH, (15, 5))
+        draw.text((92, 6), f"{trash_owner}'s Week", inky_display.BLACK, font=font_header)
+        draw.text((30, 260), f"Updated at {LAST_UPDATED}", inky_display.BLACK, font=font_baseline)
+        draw.multiline_text((30, 100), quote, inky_display.BLACK, font=font_quote, spacing=5)
+    except Exception as e:
+        print(f"Error during drawing: {e}")
+        draw.text((20, 25), f"Error:\n{e}", inky_display.RED, font=font_baseline)
 
-        if json_data and len(json_data) > 0:
-            json_data_formatted = json.loads(json_data)
-            latest_price_float = json_data_formatted["result"]["XXBTZUSD"]["c"][0]
-            print(f"Found price: {float(latest_price_float):,.2f}")
-            cab.write_file("BTC_LATEST_PRICE", content=latest_price_float)
-            return f"{float(latest_price_float):,.2f}"
+    # Display the image on the InkyWHAT
+    inky_display.set_image(img)
+    inky_display.show()
 
-    except (KeyError, requests.exceptions.Timeout) as error:
-        print("API - KeyError", error)
-        print(f"Returning {latest_price_stored[0]}")
-        return latest_price_stored[0]
-
-
-# load cabinet
-planty_status = cab.get("planty", "status")
-weather_data = cab.get("weather", "data")
-
-# steps
-STEPS = 'No steps found'
-steps_data = cab.get_file_as_array('log_steps.csv', '/home/tyler/syncthing/log')
-if steps_data and len(steps_data) > 0:
-    STEPS = f"{steps_data[-1].split(',')[1]} steps today"
-else:
-    print(f"Steps Not Found")
-
-if weather_data is None:
-    cab.log("Could not find weather data", level="error")
-    sys.exit(-1)
-
-# load images
-img_btc = Image.open(directory_resources + "btc.png")
-img_plant_inside = Image.open(
-    directory_resources + "icon-plant-inside.png")
-img_plant_outside = Image.open(
-    directory_resources + "icon-plant-outside.png")
-img_plant_unknown = Image.open(
-    directory_resources + "icon-plant-unknown.png")
-img_weather = Image.open(directory_resources +
-                         f"weather/{weather_data['current_conditions_icon']}.png")
-
-# temperature
-try:
-    TEMPERATURE_OUT = round(
-        (file_weather[-1]["weather_data"]["current_temperature"] - 273.15) * 9/5 + 32)
-except (KeyError, IndexError):
-    TEMPERATURE_OUT = "--"
-
-TEMPERATURE_FONT_SIZE = 50
-
-if isinstance(TEMPERATURE_OUT, int) and (TEMPERATURE_OUT >= 100 or TEMPERATURE_OUT <= -10):
-    TEMPERATURE_FONT_SIZE -= 5
-
-TEMPERATURE_FONT_SIZE_OUTSIDE = TEMPERATURE_FONT_SIZE + 30
-
-# load fonts
-font_baseline = ImageFont.truetype(SourceSansProSemibold, 24)
-font_header = ImageFont.truetype(SourceSansProSemibold, 35)
-font_price = ImageFont.truetype(SourceSansProSemibold, 55)
-font_steps = ImageFont.truetype(SourceSansProSemibold, 40)
-font_price_label = ImageFont.truetype(SourceSansProSemibold, 20)
-font_temperature = ImageFont.truetype(
-    SourceSansProSemibold, TEMPERATURE_FONT_SIZE)
-font_temperature_outside = ImageFont.truetype(
-    SourceSansProSemibold, TEMPERATURE_FONT_SIZE_OUTSIDE)
-font_divider = ImageFont.truetype(SourceSansProSemibold, 70)
-
-# add elements to backdrop
-try:
-    print("Drawing...")
-    draw.text((20, 60), STEPS, inky_display.BLACK, font=font_steps)
-    draw.text((20, 0), f"BTC ${get_coin_price()}",
-              inky_display.BLACK, font=font_price)
-    draw.text((40, 100), f"{TEMPERATURE_OUT}°",
-              inky_display.BLACK, font=font_temperature_outside)
-    draw.text((40, 190), f"{temperature_in}°",
-              inky_display.RED, font=font_temperature)
-    img.paste(img_weather, (185, 160))
-
-    draw.text((265, 145), "|", inky_display.RED, font=font_divider)
-    draw.text((20, 260), f"Updated at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
-              inky_display.BLACK, font=font_baseline)
-    if planty_status == 'in':
-        img.paste(img_plant_inside, (300, 160))
-    elif planty_status == 'out':
-        img.paste(img_plant_outside, (300, 160))
-    else:
-        img.paste(img_plant_unknown, (300, 160))
-except (IndexError, KeyError) as e:
-    traceback.print_exc()
-    mail.send("InkyPi Error", traceback.format_exc())
-    draw.text((20, 25), f"Error:\n{e}", inky_display.RED, font=font_baseline)
-
-
-# display
-inky_display.set_image(img)
-inky_display.show()
+if __name__ == "__main__":
+    main()
