@@ -80,6 +80,8 @@ def setup_display(color: str = "red") -> InkyWHAT:
     """
     print("Checking for InkyWHAT...")
     inky_display = InkyWHAT(color)
+    inky_display.v_flip = True
+    inky_display.h_flip = True
     print("Found!")
     inky_display.set_border(inky_display.WHITE)
     return inky_display
